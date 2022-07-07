@@ -1,0 +1,77 @@
+# ----- Πρόγραμμα
+<program> ::= PROGRAM IDENTIFIER NEWLINE <struct_decl> <func_decl> <var_decl> <main>
+
+# ----- Κυρίως πρόγραμμα
+<main> ::= STARTMAIN <var_decl> <commands> ENDMAIN
+
+# ----- Δομή
+<struct_decl> ::= ε | <struct> <struct_decl> 
+<struct> ::= STRUCT IDENTIFIER NEWLINE VARS <vars_list> ENDSTRUCT
+        | TYPEDEF STRUCT IDENTIFIER NEWLINE VARS <vars_list> IDENTIFIER ENDSTRUCT
+
+# ----- Συναρτήσεις
+<func_decl> ::= ε | <func_list>
+<func_list> ::= <function> | <function> <func_list>
+<function> ::= FUNCTION IDENTIFIER LPAR <parameters> RPAR NEWLINE <var_decl> <commands> RETURN <return> END_FUNCTION
+<return> ::= <expression_list> SCOL
+
+# ----- Παράμετροι συναρτήσεων
+<parameters> ::= ε | <parameter_list>
+<parameter_list> ::= <type> <variable> | <type> <variable> COMMA <parameter_list>
+
+# ----- Μεταβλητές
+<var_decl> ::= ε | VARS <vars_list>
+<vars_list> ::= <type> <vars> SCOL | <type> <vars> SCOL <vars_list>
+<vars> ::= <variable> | <variable> COMMA <vars>
+<variable> ::= IDENTIFIER | IDENTIFIER LBRAK POS_INT RBRAK
+
+<type> ::= INTEGER | CHAR
+<literal> ::= <string> | <number> | <char>
+
+# ----- Μαθηματικοί-Λογικοί τελεστές
+<log_op> ::= AND | OR | GT | LT | EQ_OP | NE_OP
+<math_op> ::= PLUS | MINUS | POW | STAR | SLASH
+
+# ---------- Εντολές Προγράμματος ----------
+
+<commands> ::= ε | <list_of_cmds>
+<list_of_cmds> ::= <command> | <command> <list_of_cmds>
+<command> ::= <assign> | <loop> | <branch> | <print> | <break> | <func_call>
+
+# ----- Ανάθεση
+<assign> ::= IDENTIFIER EQ <expression_list> SCOL
+<expression_list> ::= <expression> | <expression> <math_op> <expression_list>
+<expression> ::= <literal> | IDENTIFIER | <func_call>
+
+# ----- Κλήση συνάρτησης
+<func_call> ::= IDENTIFIER LPAR <call_params> RPAR SCOL
+<call_params> ::= ε | <variable> | <literal>
+
+# ----- Εντολές βρόχου
+<loop> ::= WHILE LPAR <condition> RPAR <commands> ENDWHILE 
+        | FOR LPAR <for_start> TO <for_target> STEP <for_target> RPAR <commands> ENDFOR
+<for_start> ::= ε | IDENTIFIER EQ <number>
+<for_target> ::= ε | <number>
+
+# ----- Τερματισμός βρόχου
+<break> ::= BREAK SCOL
+
+# ----- Εντολές ελέγχου
+<branch> ::= IF LPAR <condition> RPAR THEN <commands> <if_commands> ENDIF
+        | SWITCH LPAR <sw_checks> RPAR <sw_cases> ENDSWITCH
+<if_commands> ::= ε | ELSEIF LPAR <condition> RPAR THEN <commands> <if_commands>
+        | ELSE <commands>
+<sw_checks> ::= <sw_check> | <sw_check> <math_op> <sw_checks>
+<sw_check> ::=  <literal> | IDENTIFIER | <func_call>
+<sw_cases> ::= <sw_default> | <sw_case> | <sw_case> <sw_cases>
+<sw_case> ::= CASE LPAR <sw_expr> RPAR COL <commands>
+<sw_expr> ::= <literal> | <literal> <math_op> <sw_expr>
+<sw_default> ::= DEFAULT COL <commands>
+
+# ----- Συνθήκη ελέγχου
+<condition> ::= <comparable> <log_op> <comparable>
+<comparable> ::= IDENTIFIER | <literal> | <comparable> <math_op> <comparable> | <comparable> <log_op> <comparable>
+
+# ----- Εντολή εκτύπωσης στην οθόνη
+<print> ::= PRINT LPAR <string> <print_var> RPAR SCOL
+<print_var> ::= ε | COMMA <vars>
