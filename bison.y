@@ -52,18 +52,18 @@ struct Array structures;
 %type<item> print_input
 
 %%
-// ---------- Πρόγραμμα
+// ---------- Program
 program: PROGRAM IDENTIFIER struct_decl func_decl main {printf("Source code has no syntax errors!\n");};
 
-// ---------- Κυρίως πρόγραμμα
+// ---------- Main program
 main: STARTMAIN var_decl commands ENDMAIN;
 
-// ---------- Δομή
+// ---------- Struct
 struct_decl: | struct struct_decl;
 struct: STRUCT IDENTIFIER VARS vars_list ENDSTRUCT
       | TYPEDEF STRUCT IDENTIFIER VARS vars_list IDENTIFIER ENDSTRUCT;
 
-// ---------- Συναρτήσεις
+// ---------- Functions
 func_decl: | func_list;
 func_list: function | func_list function;
 function: FUNCTION IDENTIFIER LPAR parameters RPAR var_decl commands RETURN return ENDFUNCTION
@@ -71,11 +71,11 @@ function: FUNCTION IDENTIFIER LPAR parameters RPAR var_decl commands RETURN retu
 
 return: expression_list SCOL;
 
-// ---------- Παράμετροι συναρτήσεων
+// ---------- Parameters
 parameters: | parameter_list;
 parameter_list: type variable | type variable COMMA parameter_list;
 
-// ---------- Μεταβλητές
+// ---------- Variables
 var_decl: | VARS vars_list;
 vars_list: type vars SCOL | type vars SCOL vars_list;
 vars: variable | variable COMMA vars;
@@ -92,34 +92,34 @@ character: CHARACTER {$$ = $1;};
 integer: DECINTEGER {$$ = $1;};
 identifier: IDENTIFIER {$$ = $1;};
 
-// ---------- Μαθηματικοί-Λογικοί τελεστές
+// ---------- Operators
 log_op: AND | OR | GT | LT | EQ_OP | NE_OP;
 math_op: PLUS | MINUS | POW | STAR | SLASH;
 
-// ---------- Εντολές Προγράμματος ----------
+// ---------- Commands ----------
 commands: | list_of_cmds;
 list_of_cmds: command | command list_of_cmds;
 command: assign | loop | branch | print | break | func_call;
 
-// ---------- Ανάθεση
+// ---------- Assign
 assign: IDENTIFIER EQ expression_list SCOL;
 expression_list: expression | expression math_op expression_list;
 expression: literal | IDENTIFIER | func_call;
 
-// ---------- Κλήση συνάρτησης
+// ---------- Function call
 func_call: identifier LPAR call_params RPAR SCOL{checkDefinition($1,&functions);};
 call_params: | variable | literal;
 
-// ---------- Εντολές βρόχου
+// ---------- Loops
 loop: WHILE LPAR condition RPAR commands ENDWHILE
       | FOR LPAR for_start TO for_target STEP for_target RPAR commands ENDFOR;
 for_start: | IDENTIFIER EQ INTEGER;
 for_target: | INTEGER;
 
-// ---------- Τερματισμός βρόχου
+// ---------- End loop
 break: BREAK SCOL;
 
-// ---------- Εντολές ελέγχου
+// ---------- Flow controls
 branch: IF LPAR condition RPAR THEN commands if_commands ENDIF
       | SWITCH LPAR sw_checks RPAR sw_cases ENDSWITCH;
 
@@ -133,11 +133,11 @@ sw_case: CASE LPAR sw_expr RPAR COL commands;
 sw_expr: literal | literal math_op sw_expr;
 sw_default: DEFAULT COL commands;
 
-// ---------- Συνθήκη ελέγχου
+// ---------- Condition check
 condition: comparable log_op comparable;
 comparable: IDENTIFIER | literal | comparable math_op comparable | comparable log_op comparable;
 
-// ---------- Εντολή εκτύπωσης στην οθόνη
+// ---------- Print on screen
 print:
       PRINT LPAR string RPAR SCOL
       { struct Variable empty; empty.type=FUN; print($3.string,empty, &variables);}
